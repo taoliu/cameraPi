@@ -1,0 +1,43 @@
+#!/usr/bin/python
+
+import StringIO
+import subprocess
+import os
+import time
+from datetime import datetime
+
+videoWidth = 640
+videoHeight = 480
+fps = 24
+timespan = 3 * 60 * 1000 # 3 minutes in ms
+
+filepath = "/home/taoliu/public_html/video/"
+filenamePrefix = "record"
+
+diskSpaceToReserve = 1000 * 1024 * 1024 # Keep 40 mb free on disk
+
+# Save a video to disk
+def captureVideo(width, height, diskSpaceToReserve):
+    keepDiskSpaceFree(diskSpaceToReserve)
+    time = datetime.now()
+    filename = filepath + "/" + filenamePrefix + "-%04d%02d%02d-%02d%02d%02d.avi" % ( time.year, time.month, time.day, time.hour, time.minute, time.second)
+    subprocess.call("raspivid -vf -w %d -h %d -fps %d -t %d -o %s" % (width, height, fps, timespan, filename), shell=True)
+
+# Keep free space above given level
+def keepDiskSpaceFree(bytesToReserve):
+    if (getFreeSpace() < bytesToReserve):
+        for filename in sorted(os.listdir(".")):
+            if filename.startswith(fileNamePrefix) and filename.endswith(".avi"):
+                os.remove(filename)
+                if (getFreeSpace() > bytesToReserve):
+                    return
+
+# Get available disk space
+def getFreeSpace():
+    st = os.statvfs(".")
+    du = st.f_bavail * st.f_frsize
+    return du
+
+
+while (True):
+    captureVideo(videoWidth, videoHeight, diskSpaceToReserve)
