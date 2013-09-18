@@ -1,0 +1,19 @@
+#!/bin/sh -e
+### BEGIN INIT INFO
+# Provides:          autorecord
+# Required-Start: $local_fs $syslog $remote_fs
+# Required-Stop:
+# Default-Start:  2 3 4 5
+# Default-Stop: 0 1 6
+# Short-Description: Start video recording
+# Description: loads record.py
+### END INIT INFO
+
+case "$1" in
+  start) ;;
+  stop|restart|force-reload) exit 0 ;;
+  *) echo "Usage: $0 {start|stop|restart|force-reload}" >&2; exit 1 ;;
+esac
+
+[ -x /home/taoliu/public_html/video/ ] \
+	&& exec /home/taoliu/record.py
